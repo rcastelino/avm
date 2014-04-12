@@ -66,7 +66,7 @@ display_help() {
 
   Options:
 
-    -V, --version   Output current version of n
+    -V, --version   Output current version of avm
     -h, --help      Display help information
 
   Aliases:
