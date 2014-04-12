@@ -1,6 +1,6 @@
 {   "name": "appium-version-manager"
   , "description": "Appium version manager"
-  , "version": "0.1.1"
+  , "version": "0.1.2"
   , "author": "Abhinav Singh <mailsforabhinav@gmail.com>"
   , "homepage": "https://github.com/abhinavsingh/avm"
   , "bugs": "https://github.com/abhinavsingh/avm/issues"

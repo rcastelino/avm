@@ -4,7 +4,7 @@
 # Setup.
 #
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 AVM_PREFIX=${AVM_PREFIX-/usr/local}
 VERSIONS_DIR=$AVM_PREFIX/avm/versions
 UP=$'\033[A'
