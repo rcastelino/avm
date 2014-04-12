@@ -1,122 +1,113 @@
-# n
+# avm
 
-Simple flavour of node binary management, no subshells, no profile setup, no convoluted api, just _simple_.
-
- ![](https://i.cloudup.com/59cA8VEDae.gif)
+Appium version manager, no subshells, no profile setup, no convoluted api, just _simple_.
 
 ## Installation
 
-    $ npm install -g n
+    $ npm install -g appium-version-manager
 
 or
 
     $ make install
-    
-to `$HOME`. Prefix later calls to `n` with `N_PREFIX=$HOME`
 
-    $ PREFIX=$HOME make install
+to `$HOME`. Prefix later calls to `avm` with `AVM_PREFIX=$HOME`
+
+    $ AVM_PREFIX=$HOME make install
 
 ### Installing Binaries
 
-Install a few nodes:
+Install a few appium versions:
 
-    $ n 0.8.14
-    $ n 0.8.17
-    $ n 0.9.6
+    $ avm latest
+    $ avm 0.16.0
+    $ avm 0.17.6
 
-Type `n` to prompt selection of an installed node. Use the up /
+Type `avm` to prompt selection of an installed appium. Use the up /
 down arrow to navigate, and press enter or the right arrow to
 select, or ^C to cancel:
 
-    $ n
+    $ avm
 
-      0.8.14
-    ο 0.8.17
-      0.9.6
+      0.16.0
+    ο 0.17.6
+      0.18.1
 
 Use or install the latest official release:
 
-    $ n latest
-
-Use or install the stable official release:
-
-    $ n stable
+    $ avm latest
 
 Switch to the previous version you were using:
 
-    $ n prev
+    $ avm prev
 
-### Removing Binaries
+### Removing Versions
 
 Remove some versions:
 
-    $ n rm 0.9.4 v0.10.0
+    $ avm rm 0.16.0 0.18.1
 
 Instead of using `rm` we can simply use `-`:
 
-    $ n - 0.9.4
+    $ avm - 0.18.1
 
-### Binary Usage
+### Appium Usage
 
-When running multiple versions of node, we can target
-them directly by asking `n` for the binary path:
+When running multiple versions of appium, we can target
+them directly by asking `avm` for the binary path:
 
-    $ n bin 0.9.4
-    /usr/local/n/versions/0.9.4/bin/node
+    $ avm bin 0.16.0
+    /usr/local/avm/versions/0.16.0/node_modules/appium/bin/appium.js
 
-Or by using a specific version through `n`'s `use` sub-command:
+Or by using a specific version through `avm`'s `use` sub-command:
 
-    $ n use 0.9.4 some.js
-
-with flags:
-
-    $ n as 0.9.4 --debug some.js
+    $ avm use 0.18.1 -p 4723 -U c9ccb3bs43ef70cb0d79a113c21a6b4bbee03e28 --app com.app.bundle.id
 
 ## Usage
 
- Output from `n --help`:
+Output from `avm --help`:
 
-    Usage: n [options] [COMMAND] [args]
+    Usage: avm [options] [COMMAND] [args]
 
     Commands:
 
-      n                            Output versions installed
-      n latest                     Install or activate the latest node release
-      n stable                     Install or activate the latest stable node release
-      n <version>                  Install node <version>
-      n use <version> [args ...]   Execute node <version> with [args ...]
-      n bin <version>              Output bin path for <version>
-      n rm <version ...>           Remove the given version(s)
-      n --latest                   Output the latest node version available
-      n --stable                   Output the latest stable node version available
-      n ls                         Output the versions of node available
+      avm                            Output versions installed
+      avm latest                     Install or activate the latest appium release
+      avm <version>                  Install appium <version>
+      avm use <version> [args ...]   Execute appium <version> with [args ...]
+      avm bin <version>              Output bin path for <version>
+      avm rm <version ...>           Remove the given version(s)
+      avm prev                       Revert to the previously activated version
+      avm --latest                   Output the latest appium version available
+      avm ls                         Output the versions of appium available
 
     Options:
 
-      -V, --version   Output current version of n
+      -V, --version   Output current version of avm
       -h, --help      Display help information
 
     Aliases:
 
       which   bin
-      use     as
+      as      use
       list    ls
       -       rm
 
 ## Details
 
- `n` by default installs node to _/usr/local/n/versions_, from
- which it can see what you have currently installed, and activate previously installed versions of node when `n <version>` is invoked again.
+ `avm` by default installs appium to _/usr/local/avm/versions_, from
+ which it can see what you have currently installed, and activate previously 
+ installed versions of appium when `avm <version>` is invoked again.
 
- Activated nodes are then installed to the prefix _/usr/local_, which of course may be altered via the __N_PREFIX__ environment variable.
+ Activated appium binary is then installed by symlinking to _/usr/local/bin/appium_.
 
- To alter where `n` operates simply export __N_PREFIX__ to whatever you prefer.
+ To alter where `avm` operates simply export __AVM_PREFIX__ to whatever you prefer.
+ It defaults to _/usr/local_
 
 ## License
 
 (The MIT License)
 
-Copyright (c) 2014 TJ Holowaychuk &lt;tj@vision-media.ca&gt;
+Copyright (c) 2014 Abhinav Singh &lt;mailsforabhinav@gmail.com&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

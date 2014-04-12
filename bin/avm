@@ -5,8 +5,8 @@
 #
 
 VERSION="1.2.1"
-N_PREFIX=${N_PREFIX-/usr/local}
-VERSIONS_DIR=$N_PREFIX/n/versions
+AVM_PREFIX=${AVM_PREFIX-/usr/local}
+VERSIONS_DIR=$AVM_PREFIX/avm/versions
 UP=$'\033[A'
 DOWN=$'\033[B'
 
@@ -29,16 +29,18 @@ abort() {
 }
 
 #
+# require npm
+#
+
+command -v npm > /dev/null || abort "npm not found"
+
+#
 # Ensure we have curl or wget support.
 #
 
 GET=
-
-# wget support (Added --no-check-certificate for Github downloads)
 command -v wget > /dev/null && GET="wget --no-check-certificate -q -O-"
-
 command -v curl > /dev/null && GET="curl -# -L"
-
 test -z "$GET" && abort "curl or wget required"
 
 #
@@ -48,21 +50,19 @@ test -z "$GET" && abort "curl or wget required"
 display_help() {
   cat <<-EOF
 
-  Usage: n [options] [COMMAND] [args]
+  Usage: avm [options] [COMMAND] [args]
 
   Commands:
 
-    n                            Output versions installed
-    n latest                     Install or activate the latest node release
-    n stable                     Install or activate the latest stable node release
-    n <version>                  Install node <version>
-    n use <version> [args ...]   Execute node <version> with [args ...]
-    n bin <version>              Output bin path for <version>
-    n rm <version ...>           Remove the given version(s)
-    n prev                       Revert to the previously activated version
-    n --latest                   Output the latest node version available
-    n --stable                   Output the latest stable node version available
-    n ls                         Output the versions of node available
+    avm                            Output versions installed
+    avm latest                     Install or activate the latest appium release
+    avm <version>                  Install appium <version>
+    avm use <version> [args ...]   Execute appium <version> with [args ...]
+    avm bin <version>              Output bin path for <version>
+    avm rm <version ...>           Remove the given version(s)
+    avm prev                       Revert to the previously activated version
+    avm --latest                   Output the latest appium version available
+    avm ls                         Output the versions of appium available
 
   Options:
 
@@ -72,7 +72,7 @@ display_help() {
   Aliases:
 
     which   bin
-    use     as
+    as      use
     list    ls
     -       rm
 
@@ -125,9 +125,9 @@ display_n_version() {
 #
 
 check_current_version() {
-  which node &> /dev/null
+  which appium &> /dev/null
   if test $? -eq 0; then
-    active=`node --version`
+    active=`appium --version`
     active=${active#v}
   fi
 }
@@ -172,7 +172,7 @@ list_versions_installed() {
 }
 
 #
-# Display current node --version and others installed.
+# Display current appium --version and others installed.
 #
 
 display_versions() {
@@ -217,31 +217,6 @@ is_ok() {
 }
 
 #
-# Determine tarball url for <version>
-#
-
-tarball_url() {
-  local version=$1
-  local uname="$(uname -a)"
-  local arch=x86
-  local os=
-
-  # from nave(1)
-  case "$uname" in
-    Linux*) os=linux ;;
-    Darwin*) os=darwin ;;
-    SunOS*) os=sunos ;;
-  esac
-
-  case "$uname" in
-    *x86_64*) arch=x64 ;;
-    *armv6l*) arch=arm-pi ;;
-  esac
-
-  echo "http://nodejs.org/dist/v${version}/node-v${version}-${os}-${arch}.tar.gz"
-}
-
-#
 # Activate <version>
 #
 
@@ -251,12 +226,14 @@ activate() {
   if test "$version" != "$active"; then
     local dir=$VERSIONS_DIR/$version
     echo $active > $VERSIONS_DIR/.prev
-    cp -fR $dir/* $N_PREFIX
+    mkdir -p $AVM_PREFIX/bin
+    rm -f $AVM_PREFIX/bin/appium
+    ln -s $dir/node_modules/appium/bin/appium.js $AVM_PREFIX/bin/appium
   fi
 }
 
 #
-# Activate previous node.
+# Activate previous appium.
 #
 
 activate_previous() {
@@ -273,34 +250,20 @@ activate_previous() {
 # Install <version>
 #
 
-install_node() {
+install_appium() {
   local version=${1#v}
-
+  
   local dots=`echo $version | sed 's/[^.]*//g'`
-  if test ${#dots} -eq 1; then
-    version=`$GET 2> /dev/null http://nodejs.org/dist/ \
-      | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
-      | egrep -v '^0\.[0-7]\.' \
-      | egrep -v '^0\.8\.[0-5]$' \
-      | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
-      | egrep ^$version \
-      | tail -n1`
-
-    test $version || abort "invalid version ${1#v}"
-  fi
-
   local dir=$VERSIONS_DIR/$version
-  local url=$(tarball_url $version)
 
   if test -d $dir; then
     activate $version
+    log exists $(appium --version)
     exit
   fi
 
   echo
   log install v$version
-
-  is_ok $url || abort "invalid version $version"
 
   log mkdir $dir
   mkdir -p $dir
@@ -310,12 +273,17 @@ install_node() {
 
   cd $dir
 
-  log fetch $url
-  curl -L# $url | tar -zx --strip 1
-  erase_line
+  log install $version
+  npm install appium@$version
+  if [ $? -ne 0 ]; then
+    log rm $dir
+    rm -R $dir
+    abort "appium $version install failed"
+  fi
+  #erase_line
 
   activate $version
-  log installed $(node --version)
+  log installed $(appium --version)
   echo
 }
 
@@ -338,7 +306,7 @@ remove_versions() {
 display_bin_path_for_version() {
   test -z $1 && abort "version required"
   local version=${1#v}
-  local bin=$VERSIONS_DIR/$version/bin/node
+  local bin=$VERSIONS_DIR/$version/node_modules/appium/bin/appium.js
   if test -f $bin; then
     printf $bin
   else
@@ -347,13 +315,13 @@ display_bin_path_for_version() {
 }
 
 #
-# Execute the given <version> of node with [args ...]
+# Execute the given <version> of appium with [args ...]
 #
 
 execute_with_version() {
   test -z $1 && abort "version required"
   local version=${1#v}
-  local bin=$VERSIONS_DIR/$version/bin/node
+  local bin=$VERSIONS_DIR/$version/node_modules/appium/bin/appium.js
 
   shift # remove version
 
@@ -365,54 +333,11 @@ execute_with_version() {
 }
 
 #
-# Display the latest node release version.
+# Display the latest appium release version.
 #
 
 display_latest_version() {
-  $GET 2> /dev/null http://nodejs.org/dist/ \
-    | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
-    | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
-    | tail -n1
-}
-
-#
-# Display the latest stable node release version.
-#
-
-display_latest_stable_version() {
-  $GET 2> /dev/null http://nodejs.org/dist/ \
-    | egrep -o '[0-9]+\.[0-9]*[02468]\.[0-9]+' \
-    | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
-    | tail -n1
-}
-
-#
-# Display the versions of node available.
-#
-
-display_remote_versions() {
-  check_current_version
-  local versions=""
-  versions=`$GET 2> /dev/null http://nodejs.org/dist/ \
-    | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
-    | egrep -v '^0\.[0-7]\.' \
-    | egrep -v '^0\.8\.[0-5]$' \
-    | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
-    | awk '{ print "  " $1 }'`
-
-  echo
-  for v in $versions; do
-    if test "$active" = "$v"; then
-      printf "  \033[36mο\033[0m $v \033[0m\n"
-    else
-      if test -d $VERSIONS_DIR/$v; then
-        printf "    $v \033[0m\n"
-      else
-        printf "    \033[90m$v\033[0m\n"
-      fi
-    fi
-  done
-  echo
+  npm show appium version --loglevel silent | xargs
 }
 
 #
@@ -428,15 +353,12 @@ else
       -V|--version) display_n_version ;;
       -h|--help|help) display_help ;;
       --latest) display_latest_version; exit ;;
-      --stable) display_latest_stable_version; exit ;;
       bin|which) display_bin_path_for_version $2; exit ;;
       as|use) shift; execute_with_version $@; exit ;;
       rm|-) shift; remove_versions $@; exit ;;
-      latest) install_node `n --latest`; exit ;;
-      stable) install_node `n --stable`; exit ;;
-      ls|list) display_remote_versions; exit ;;
+      latest) install_appium `avm --latest`; exit ;;
       prev) activate_previous; exit ;;
-      *) install_node $1; exit ;;
+      *) install_appium $1; exit ;;
     esac
     shift
   done
