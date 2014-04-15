@@ -10,9 +10,9 @@ or
 
     $ make install
 
-to `$HOME`. Prefix later calls to `avm` with `AVM_PREFIX=$HOME`
+to `$HOME`. Prefix later calls to `avm` with `PREFIX=$HOME`
 
-    $ AVM_PREFIX=$HOME make install
+    $ PREFIX=$HOME make install
 
 ### Installing Binaries
 
