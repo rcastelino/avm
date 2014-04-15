@@ -1,7 +1,7 @@
 
 PREFIX ?= /usr/local
 
-install: bin/n
+install: bin/avm
 	cp $< $(PREFIX)/$<
 
 uninstall:
