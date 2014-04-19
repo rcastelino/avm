@@ -340,6 +340,10 @@ display_latest_version() {
   npm show appium version --loglevel silent | xargs
 }
 
+display_available_versions() {
+    npm show appium versions
+}
+
 #
 # Handle arguments.
 #
@@ -358,6 +362,7 @@ else
       rm|-) shift; remove_versions $@; exit ;;
       latest) install_appium `avm --latest`; exit ;;
       prev) activate_previous; exit ;;
+      ls) display_available_versions; exit ;;
       *) install_appium $1; exit ;;
     esac
     shift
