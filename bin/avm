@@ -228,7 +228,7 @@ activate() {
     echo $active > $VERSIONS_DIR/.prev
     mkdir -p $AVM_PREFIX/bin
     rm -f $AVM_PREFIX/bin/appium
-    ln -s $dir/node_modules/appium/bin/appium.js $AVM_PREFIX/bin/appium
+    ln -s $dir/node_modules/appium/build/lib/main.js $AVM_PREFIX/bin/appium
   fi
 }
 
@@ -306,7 +306,7 @@ remove_versions() {
 display_bin_path_for_version() {
   test -z $1 && abort "version required"
   local version=${1#v}
-  local bin=$VERSIONS_DIR/$version/node_modules/appium/bin/appium.js
+  local bin=$VERSIONS_DIR/$version/node_modules/appium/build/lib/appium.js
   if test -f $bin; then
     printf $bin
   else
@@ -321,7 +321,7 @@ display_bin_path_for_version() {
 execute_with_version() {
   test -z $1 && abort "version required"
   local version=${1#v}
-  local bin=$VERSIONS_DIR/$version/node_modules/appium/bin/appium.js
+  local bin=$VERSIONS_DIR/$version/node_modules/appium/build/lib/main.js
 
   shift # remove version
 
