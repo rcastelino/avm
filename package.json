@@ -1,7 +1,7 @@
 {
   "name": "appium-version-manager-1.5",
   "description": "Appium version manager for Appium 1.5. and above",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Roland Castelino <rolypoly123@@gmail.com>",
   "homepage": "https://github.com/abhinavsingh/avm",
   "bugs": {
