@@ -63,7 +63,7 @@ display_help() {
     avm prev                       Revert to the previously activated version
     avm --latest                   Output the latest appium version available
     avm ls                         Output the versions of appium available for install
-    avm list                         Output the versions of appium installed
+    avm list                       Output the versions of appium installed
 
   Options:
 
