@@ -62,7 +62,8 @@ display_help() {
     avm rm <version ...>           Remove the given version(s)
     avm prev                       Revert to the previously activated version
     avm --latest                   Output the latest appium version available
-    avm ls                         Output the versions of appium available
+    avm ls                         Output the versions of appium available for install
+    avm list                       Output the versions of appium installed
 
   Options:
 
@@ -73,7 +74,6 @@ display_help() {
 
     which   bin
     as      use
-    list    ls
     -       rm
 
 EOF
@@ -363,6 +363,7 @@ else
       latest) install_appium `avm --latest`; exit ;;
       prev) activate_previous; exit ;;
       ls) display_available_versions; exit ;;
+      list) list_versions_installed; exit ;;
       *) install_appium $1; exit ;;
     esac
     shift
